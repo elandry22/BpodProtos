@@ -11,12 +11,13 @@ BpodParameterGUI('init', S);
 S.Timers = zeros(1,4);
 BpodSystem.Data.nTrials = 0;
 
-initGUIcallbacks(); % Callback
-
+initGUIcallbacks(); 
 setToAutolearn();
 
+% Information about GUI gets saved at start up
 BpodSystem.Data.SessionMeta.GUIMeta = S.GUIMeta;
 BpodSystem.Data.SessionMeta.GUIPanels = S.GUIPanels;
+% save version of protocol used
 
 BpodSystem.Data.TrialTypes = []; % The trial type of each trial completed will be added here.
 BpodSystem.Data.TrialParams = cell(MAXTRIALS,1);
@@ -50,7 +51,7 @@ for TrialNum = 1:MAXTRIALS
     
     [sma, TrialParams] = getStateMatrix(TrialTypes(TrialNum),TrialNum,TrialParams);
     
-    dispTrialInfo(TrialNum, TrialTypes, TrialParams);
+    dispTrialInfo(TrialNum, TrialParams);
     
     SendStateMatrix(sma);
     
@@ -87,11 +88,9 @@ end
 
 
 
-function dispTrialInfo(TrialNum, TrialTypes, params)
-global S
+function dispTrialInfo(TrialNum, params)
+
 disp(['Starting trial ',num2str(TrialNum)])
-% disp(['     Protocol Type: ', S.GUIMeta.ProtocolType.String{S.GUI.ProtocolType}])
-% disp(['     TrialType:     ', num2str(TrialTypes(TrialNum))])
 
 if params.giveStim
     disp(['     StimState:     ', params.stimState])
@@ -107,12 +106,6 @@ disp(['     Nlicks:        ', num2str(params.Nlicks)]);
 
 function setToAutolearn()
 global S
-% if ~isempty(S.ProtocolHistory)% start each day on autolearn
-%     S.ProtocolHistory(end+1,1) = 2; % corresponds to autolearn protocol #
-%     S.GUI.Autolearn = 1;
-%     mySet('Autolearn',S.GUI.Autolearn, 'Value');
-% end
-
 % start each day on autolearn
 S.GUI.Autolearn = 1;
 mySet('Autolearn',S.GUI.Autolearn, 'Value');
@@ -174,7 +167,29 @@ end
 
 
 
+% % % Callback functions
 
+function initGUIcallbacks() 
+% forces pause before next trial
+setupGUIcallbacks('ProtocolType', @manualChangeProtocol, 0); 
+% toggles whether EphysRig specific GUI options are enabled
+setupGUIcallbacks('Location', @manualChangeLocation, 1); 
+
+% any adjustments for the waveplayer
+setupGUIcallbacks('CameraTrigger', @manualChangeWaveforms,1);
+setupGUIcallbacks('Stimulation', @manualChangeWaveforms,1);
+setupGUIcallbacks('StimHemisphere', @manualChangeWaveforms,1);
+
+
+function setupGUIcallbacks(fieldname, func, execute)
+global S BpodSystem
+
+p = cellfun(@(x) strcmp(x,fieldname),BpodSystem.GUIData.ParameterGUI.ParamNames);
+set(BpodSystem.GUIHandles.ParameterGUI.Params(p),'callback',{func, S});
+
+if execute
+    feval(func, BpodSystem.GUIHandles.ParameterGUI.Params(p), [], []);
+end
 
 
 function manualChangeProtocol(hObject, ~, ~)
@@ -187,18 +202,9 @@ BpodSystem.Data.ProtocolHistory(BpodSystem.Data.nTrials+1) = S.GUI.ProtocolType;
 BpodSystem.Status.Pause = 1; 
 
 
-
-
-function manualChangeAutolearn(hObject, ~, ~)
-global S;
-Autolearn = get(hObject,'Value');
-S.GUI.Autolearn =  Autolearn;
-mySet('Autolearn',S.GUI.Autolearn,'Value');
-S.ProtocolHistory(end+1,1) = [S.GUI.ProtocolType];
-
-
-
 function manualChangeLocation(hObject, ~, ~)
+% toggles whether EphysRig specific GUI options are enabled
+
 global S;
 Location = get(hObject,'Value');
 S.GUI.Location =  Location;
@@ -246,41 +252,12 @@ elseif ~isempty(strfind(S.GUIMeta.Location.String{locationNum}, 'Rig'))
 end
 
 
-
-
-
-
-
 function manualChangeWaveforms(hObject, ~, ~)
 global S;
 S.newWaveform = true;
 
 
 
-
-function initGUIcallbacks() 
-% Only need callbacks for things that need to happen immediately
-setupGUIcallbacks('ProtocolType', @manualChangeProtocol, 0); % forces pause before next trial
-% setupGUIcallbacks('Autolearn', @manualChangeAutolearn, 0); % may not be necessary
-setupGUIcallbacks('Location', @manualChangeLocation, 1); % 
-
-% any adjustments for the waveplayer
-setupGUIcallbacks('CameraTrigger', @manualChangeWaveforms,1);
-setupGUIcallbacks('Stimulation', @manualChangeWaveforms,1);
-setupGUIcallbacks('StimHemisphere', @manualChangeWaveforms,1);
-
-
-
-
-function setupGUIcallbacks(fieldname, func, execute)
-global S BpodSystem
-
-p = cellfun(@(x) strcmp(x,fieldname),BpodSystem.GUIData.ParameterGUI.ParamNames);
-set(BpodSystem.GUIHandles.ParameterGUI.Params(p),'callback',{func, S});
-
-if execute
-    feval(func, BpodSystem.GUIHandles.ParameterGUI.Params(p), [], []);
-end
 
 
 
@@ -297,7 +274,3 @@ switch type
         set(BpodSystem.GUIHandles.ParameterGUI.Params(p), 'Enable', parameterValue)
 
 end
-
-
-
-

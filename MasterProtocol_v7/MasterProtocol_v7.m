@@ -11,12 +11,13 @@ BpodParameterGUI('init', S);
 S.Timers = zeros(1,4);
 BpodSystem.Data.nTrials = 0;
 
-initGUIcallbacks(); % Callbacks are executed right when GUI option changes
-
+initGUIcallbacks(); 
 setToAutolearn();
 
+% Information about GUI gets saved at start up
 BpodSystem.Data.SessionMeta.GUIMeta = S.GUIMeta;
 BpodSystem.Data.SessionMeta.GUIPanels = S.GUIPanels;
+% save version of protocol used
 
 BpodSystem.Data.TrialTypes = []; % The trial type of each trial completed will be added here.
 BpodSystem.Data.TrialParams = cell(MAXTRIALS,1);
@@ -166,7 +167,29 @@ end
 
 
 
+% % % Callback functions
 
+function initGUIcallbacks() 
+% forces pause before next trial
+setupGUIcallbacks('ProtocolType', @manualChangeProtocol, 0); 
+% toggles whether EphysRig specific GUI options are enabled
+setupGUIcallbacks('Location', @manualChangeLocation, 1); 
+
+% any adjustments for the waveplayer
+setupGUIcallbacks('CameraTrigger', @manualChangeWaveforms,1);
+setupGUIcallbacks('Stimulation', @manualChangeWaveforms,1);
+setupGUIcallbacks('StimHemisphere', @manualChangeWaveforms,1);
+
+
+function setupGUIcallbacks(fieldname, func, execute)
+global S BpodSystem
+
+p = cellfun(@(x) strcmp(x,fieldname),BpodSystem.GUIData.ParameterGUI.ParamNames);
+set(BpodSystem.GUIHandles.ParameterGUI.Params(p),'callback',{func, S});
+
+if execute
+    feval(func, BpodSystem.GUIHandles.ParameterGUI.Params(p), [], []);
+end
 
 
 function manualChangeProtocol(hObject, ~, ~)
@@ -229,35 +252,12 @@ elseif ~isempty(strfind(S.GUIMeta.Location.String{locationNum}, 'Rig'))
 end
 
 
-
 function manualChangeWaveforms(hObject, ~, ~)
 global S;
 S.newWaveform = true;
 
 
-function initGUIcallbacks() 
-% forces pause before next trial
-setupGUIcallbacks('ProtocolType', @manualChangeProtocol, 0); 
-% toggles whether EphysRig specific GUI options are enabled
-setupGUIcallbacks('Location', @manualChangeLocation, 1); 
 
-% any adjustments for the waveplayer
-setupGUIcallbacks('CameraTrigger', @manualChangeWaveforms,1);
-setupGUIcallbacks('Stimulation', @manualChangeWaveforms,1);
-setupGUIcallbacks('StimHemisphere', @manualChangeWaveforms,1);
-
-
-
-
-function setupGUIcallbacks(fieldname, func, execute)
-global S BpodSystem
-
-p = cellfun(@(x) strcmp(x,fieldname),BpodSystem.GUIData.ParameterGUI.ParamNames);
-set(BpodSystem.GUIHandles.ParameterGUI.Params(p),'callback',{func, S});
-
-if execute
-    feval(func, BpodSystem.GUIHandles.ParameterGUI.Params(p), [], []);
-end
 
 
 
@@ -274,7 +274,3 @@ switch type
         set(BpodSystem.GUIHandles.ParameterGUI.Params(p), 'Enable', parameterValue)
 
 end
-
-
-
-
