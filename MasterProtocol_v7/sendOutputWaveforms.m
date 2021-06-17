@@ -57,9 +57,10 @@ if ~isempty(strfind(S.GUIMeta.Location.String{S.GUI.Location}, 'EphysRig1'))
             wavParams.cam.pulsewid = 0.5; %ms
             wavParams.cam.duration = 20; %sec
             wavParams.cam.pulseAmp = 5;
+            wavParams.cam.trigProf = 1;
             
-            W.TriggerProfiles(1,:) = [2 0 0 0]; 
-            serialMsgs{2} = ['P' 1-1]; % play profile 0 (ie W.TriggerProfiles(1,:))
+            W.TriggerProfiles(wavParams.cam.trigProf,:) = [2 0 0 0]; 
+            serialMsgs{2} = ['P' wavParams.cam.trigProf-1]; 
             loadSquareWave(W, wavParams.cam)
             
             
