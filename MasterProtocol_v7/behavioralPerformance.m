@@ -106,7 +106,6 @@ BpodSystem.Data.TrialData.NoResponse(TrialNum) = 0;
 BpodSystem.Data.TrialData.Early(TrialNum) = -1;
 BpodSystem.Data.TrialData.Autolearn(TrialNum) = 1;
 BpodSystem.Data.TrialData.Autowater(TrialNum) = 0;
-BpodSystem.Data.TrialData.Reversal(TrialNum) = 0;
 BpodSystem.Data.TrialData.WaterDrop(TrialNum) = 0;
 BpodSystem.Data.TrialData.None(TrialNum) = 0;
 BpodSystem.Data.TrialData.GoCue(TrialNum) = 0;
@@ -138,8 +137,6 @@ updateTrialAutolearn(TrialNum);
 % determine if autowater on
 updateTrialAutowater(TrialNum);
 
-% determine if reversal on
-updateTrialReversal(TrialNum);
 
 
 
@@ -206,14 +203,6 @@ global BpodSystem
 
 if BpodSystem.Data.GUISettings(TrialNum).Autowater == 1
     BpodSystem.Data.TrialData.Autowater(TrialNum) = 1; % autowater on
-end
-
-
-function updateTrialReversal(TrialNum)
-global BpodSystem
-
-if BpodSystem.Data.GUISettings(TrialNum).Reversal == 2 % reversal on
-    BpodSystem.Data.TrialData.Reversal(TrialNum) = 1;
 end
 
 

@@ -24,7 +24,7 @@ if isempty(fieldnames(S))  % If settings file was an empty struct, populate stru
     S.GUI.RightPortScale = 1;
     S.GUI.SamplePeriod = 1.3;		  % in sec
     S.GUI.DelayPeriod = 0.3;		  % in sec
-    S.GUI.AnswerPeriod = 3;		  % in sec
+    S.GUI.AnswerPeriod = 3;		      % in sec
     S.GUI.ConsumptionPeriod = 1.5;	  % in sec
     S.GUI.StopLickingPeriod = 1.5;	  % in sec
     S.GUI.TimeOut = 0.1;			  % in sec
@@ -41,11 +41,6 @@ if isempty(fieldnames(S))  % If settings file was an empty struct, populate stru
         'TimeOut','LeftTrialProb','ITI_Type','ITI','MinLicksForReward',...
         'MaxLicksForReward'};
     
-    % soundTask2AFC options
-    S.GUIMeta.Reversal.Style = 'popupmenu';	 % reversed paradigm
-    S.GUIMeta.Reversal.String = {'Off', 'On'};
-    S.GUI.Reversal = 1;
-    S.GUIPanels.soundTask2AFC = {'Reversal'};
     
     % spontaneous options
     S.GUIMeta.NumLickPorts.Style = 'popupmenu';
