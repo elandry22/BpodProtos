@@ -11,7 +11,7 @@ BpodParameterGUI('init', S);
 S.Timers = zeros(1,4);
 BpodSystem.Data.nTrials = 0;
 
-initGUIcallbacks(); % Callbacks are executed right when GUI option changes
+initGUIcallbacks(); % Callback
 
 setToAutolearn();
 
@@ -50,7 +50,7 @@ for TrialNum = 1:MAXTRIALS
     
     [sma, TrialParams] = getStateMatrix(TrialTypes(TrialNum),TrialNum,TrialParams);
     
-    dispTrialInfo(TrialNum, TrialParams);
+    dispTrialInfo(TrialNum, TrialTypes, TrialParams);
     
     SendStateMatrix(sma);
     
@@ -87,9 +87,11 @@ end
 
 
 
-function dispTrialInfo(TrialNum, params)
-
+function dispTrialInfo(TrialNum, TrialTypes, params)
+global S
 disp(['Starting trial ',num2str(TrialNum)])
+% disp(['     Protocol Type: ', S.GUIMeta.ProtocolType.String{S.GUI.ProtocolType}])
+% disp(['     TrialType:     ', num2str(TrialTypes(TrialNum))])
 
 if params.giveStim
     disp(['     StimState:     ', params.stimState])
@@ -105,6 +107,12 @@ disp(['     Nlicks:        ', num2str(params.Nlicks)]);
 
 function setToAutolearn()
 global S
+% if ~isempty(S.ProtocolHistory)% start each day on autolearn
+%     S.ProtocolHistory(end+1,1) = 2; % corresponds to autolearn protocol #
+%     S.GUI.Autolearn = 1;
+%     mySet('Autolearn',S.GUI.Autolearn, 'Value');
+% end
+
 % start each day on autolearn
 S.GUI.Autolearn = 1;
 mySet('Autolearn',S.GUI.Autolearn, 'Value');
@@ -179,9 +187,18 @@ BpodSystem.Data.ProtocolHistory(BpodSystem.Data.nTrials+1) = S.GUI.ProtocolType;
 BpodSystem.Status.Pause = 1; 
 
 
-function manualChangeLocation(hObject, ~, ~)
-% toggles whether EphysRig specific GUI options are enabled
 
+
+function manualChangeAutolearn(hObject, ~, ~)
+global S;
+Autolearn = get(hObject,'Value');
+S.GUI.Autolearn =  Autolearn;
+mySet('Autolearn',S.GUI.Autolearn,'Value');
+S.ProtocolHistory(end+1,1) = [S.GUI.ProtocolType];
+
+
+
+function manualChangeLocation(hObject, ~, ~)
 global S;
 Location = get(hObject,'Value');
 S.GUI.Location =  Location;
@@ -230,16 +247,22 @@ end
 
 
 
+
+
+
+
 function manualChangeWaveforms(hObject, ~, ~)
 global S;
 S.newWaveform = true;
 
 
+
+
 function initGUIcallbacks() 
-% forces pause before next trial
-setupGUIcallbacks('ProtocolType', @manualChangeProtocol, 0); 
-% toggles whether EphysRig specific GUI options are enabled
-setupGUIcallbacks('Location', @manualChangeLocation, 1); 
+% Only need callbacks for things that need to happen immediately
+setupGUIcallbacks('ProtocolType', @manualChangeProtocol, 0); % forces pause before next trial
+% setupGUIcallbacks('Autolearn', @manualChangeAutolearn, 0); % may not be necessary
+setupGUIcallbacks('Location', @manualChangeLocation, 1); % 
 
 % any adjustments for the waveplayer
 setupGUIcallbacks('CameraTrigger', @manualChangeWaveforms,1);
