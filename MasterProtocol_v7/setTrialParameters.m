@@ -1,21 +1,7 @@
 function params = setTrialParameters()
+% sets Nlicks, ITI, determines if stim is given, selects stim delay and
+% state
 global S BpodSystem
-
-% if ~isempty(strfind(S.GUIMeta.Location.String{S.GUI.Location}, 'EphysRig1'))
-%     % set S.wavParams during sendOutputWaveforms, only exists if any
-%     % CameraTrigger, MaskingFlash, or Stimulation checked.
-%     % Saved for use during data analysis.
-%     
-%     % sendOutputWaveforms runs at beginning of session, or if Stimulation
-%     % box gets checked during session
-%     
-%     % might not need to be saved here?? doesn't change per trial
-%     if isfield(S,'wavParams')
-%         params.wav = S.wavParams; 
-%     else
-%         params.wav = [];
-%     end
-% end
 
 params.Nlicks = getNLicks();
 
@@ -31,17 +17,6 @@ if S.GUI.Stimulation
     params.giveStim = rand(1)<S.GUI.StimProbability;
 end
 
-% params.trialStim.state = {};
-% params.trialStim.wavIndex = [];
-% 
-% if params.giveStim
-%     possibleStates = unique(params.wav.stim.state);% params.wav.stim.possibleTrigStates;
-%     params.trialStim.state = datasample(possibleStates, 1); % randomly sample from possible stim states
-%     
-%     sameStateIndices = find(strcmp(params.trialStim.state,params.wav.stim.state));
-%     delayIndex = floor(rand(1)*numel(sameStateIndices));
-%     params.trialStim.wavIndex = sameStateIndices(1) + delayIndex;
-% end
 
 if params.giveStim
     % stimNum gets used throughout protocol
