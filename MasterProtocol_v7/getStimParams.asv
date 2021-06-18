@@ -9,6 +9,7 @@ angleCorFactor = -0.15;%0.1331;
 
 scanFreq = 40; %Hz, galvo scanning frequency
 stimFreq = 0; %Hz, sinusoidal stimulation oscillation frequency
+% gets incorporated in loadStimWave
 
 % [1 0 0 0] - ALM left
 % [0 1 0 0] - ALM right
@@ -33,9 +34,9 @@ end
 
 travelTime = 0.003;
 
-% power to be applied at each location, gets multiplied by num locations
-allpow = {5, 10, 15};
-alldur = {0.7}; % linear ramp gets added later, delay time-0.2=0.7
+
+allpow = {5, 10, 15}; % power to be applied at each location, multiplied by num locations
+alldur = {0.7}; % linear ramp gets added in loadStimWave, delay time-0.2=0.7
 alldel = {0}; % delays
 allstate = {'GoCue'};
 
@@ -56,14 +57,19 @@ for i = 1:numel(allpow)
 
             amp{end+1} = allpow{i}*sum(allStimLoc{j});
             loc{end+1} = allLoc{j}; % for display purposes
+
+%             if strcmp(allLoc{j},'ALM_Uni') || strcmp(allLoc{j},'M1TJ_Uni') % hard coded for 2020-07-30
+%                 amp{end+1} = allpow{i};
+%             elseif strcmp(allLoc{j}, 'ALM_Bi') || strcmp(allLoc{j}, 'M1TJ_Bi') || strcmp(allLoc{j}, 'Both_Uni')
+%                 amp{end+1} = allpow{i}*2;
+%             elseif strcmp(allLoc{j}, 'Both_Bi')
+%                 amp{end+1} = allpow{i}*4;
+%             end
             
             dur{end+1} = alldur{k};
-%             del{end+1} = alldel;
-%             durIndex{end+1} = k;
 
             [xWavShort, yWavShort] = makeGalvoWav(travelTime, W, allStimLoc{j}, scanFreq, voltsPerMm, angleCorFactor);
             stimWavShort = makeStimWav(travelTime, W, allStimLoc{j}, alldur{k}, amp{end}, scanFreq);
-            
             
             % would be nice to put this in its own function
             stimSamples = alldur{k}*W.SamplingRate;
@@ -80,9 +86,6 @@ for i = 1:numel(allpow)
                 yWav{end+1} = repmat(yWavShort,1,numRepeats);
                 stimWav{end+1} = repmat(stimWavShort,1,numRepeats);
             end
-            % ramp & stimFreq get implemented when loaded onto waveplayer
-            % in sendOutputWaveforms
-            
             
             cnt = cnt+3;
         end
@@ -95,7 +98,6 @@ end
 stim.num = num;
 stim.amp = amp;
 stim.dur = dur;
-% stim.durIndex = durIndex;
 stim.xpos = xWav;
 stim.ypos = yWav;
 stim.loc = loc;
@@ -106,6 +108,7 @@ stim.state = allstate;
 
 stim.rampDur = 0.2;
 stim.stimFreq = stimFreq;
+stim.scanFreq = scanFreq;
 
 
 function wv = makeStimWav(travelTime, W, loc, dur, amp, scanFreq)

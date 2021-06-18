@@ -98,7 +98,6 @@ end
 stim.num = num;
 stim.amp = amp;
 stim.dur = dur;
-% stim.durIndex = durIndex;
 stim.xpos = xWav;
 stim.ypos = yWav;
 stim.loc = loc;
@@ -109,6 +108,7 @@ stim.state = allstate;
 
 stim.rampDur = 0.2;
 stim.stimFreq = stimFreq;
+stim.scanFreq = scanFreq;
 
 
 function wv = makeStimWav(travelTime, W, loc, dur, amp, scanFreq)

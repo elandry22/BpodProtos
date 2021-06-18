@@ -63,8 +63,8 @@ for TrialNum = 1:MAXTRIALS
     
     try
         SendCameraMsg([5010, 5020], {'?start-capture'});
-        pause(0.5);
-        RawEvents = RunStateMatrix;		 % this step takes a long time and variable (seem to wait for GUI to update, which takes a long time)
+        pause(0.5); % pause to ensure camera starts before trial begins
+        RawEvents = RunStateMatrix;
         SendCameraMsg([5010, 5020], {'?stop-capture'});
         
         bad = 0;
@@ -126,11 +126,10 @@ global BpodSystem S
 
 if ~isempty(fieldnames(RawEvents)) % If trial data was returned
     BpodSystem.Data = AddTrialEvents(BpodSystem.Data,RawEvents); % Computes trial events from raw data
-%     BpodSystem.Data.TrialSettings(TrialNum) = S; % Adds the settings used for the current trial to the Data struct (to be saved after the trial ends)
     BpodSystem.Data.GUISettings(TrialNum) = S.GUI;
     BpodSystem.Data.TrialTypes(TrialNum) = TrialTypes(TrialNum); % Adds the trial type of the current trial to data
     BpodSystem.Data.TrialParams{TrialNum} = TrialParams;
-% don't need to save all of S, just S.GUI. S.GUIMeta and S.GUIPanels don't change
+    
     try
         behavioralPerformance('update', TrialNum);
     catch

@@ -63,8 +63,8 @@ for TrialNum = 1:MAXTRIALS
     
     try
         SendCameraMsg([5010, 5020], {'?start-capture'});
-        pause(0.5);
-        RawEvents = RunStateMatrix;		 % this step takes a long time and variable (seem to wait for GUI to update, which takes a long time)
+        pause(0.5); % pau
+        RawEvents = RunStateMatrix;
         SendCameraMsg([5010, 5020], {'?stop-capture'});
         
         bad = 0;
